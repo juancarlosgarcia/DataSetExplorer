@@ -9,7 +9,7 @@ library(shiny)
 library(UsingR)
 
 shinyServer(function(input, output) {
-
+  
   getDataset <- reactive({
     
     data <- switch (input$datasetSelect, 
@@ -24,9 +24,9 @@ shinyServer(function(input, output) {
   }, options = list(bSortClasses = TRUE, iDisplayLength = 10)) 
   
   output$myDataset <- renderText({
-
+    
     input$datasetSelect
-
+    
   })
-
+  
 })
