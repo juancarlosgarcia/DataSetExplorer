@@ -12,21 +12,31 @@ shinyUI(fluidPage(
   # Application title
   titlePanel("Data Set Explorer"),
 
-  # Sidebar with a slider input for number of bins
-  sidebarLayout(
-    sidebarPanel(
+  fluidRow(
+    column(4,
+      wellPanel (
       selectInput("datasetSelect", label = "Data Set:",
                   choices= c("iris", "mtcars", "diamond"),
                   selected="iris"
                   )
-    ),
+      ),
 
-    # Show a plot of the generated distribution
-    mainPanel(      
+      wellPanel (
+        uiOutput("colsDropDown") 
+      ),
+      wellPanel (
+        uiOutput("typesDropDown") 
+      )    
+    ),
+    
+    
+    column (8,      
       tabsetPanel(
         tabPanel(textOutput("myDataset"), dataTableOutput("myTable")),
         tabPanel("Schema", dataTableOutput("myTableSchema"))
-                 )
+                 ),
+      verbatimTextOutput("textTest")
+      
       )
     )
   )
