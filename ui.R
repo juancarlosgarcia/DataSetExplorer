@@ -13,7 +13,7 @@ shinyUI(navbarPage("Quick Data Explorer",
       column(4,
         wellPanel (
         selectInput("datasetSelect", label = "Data Set:",
-                    choices= c("iris", "mtcars", "diamond"),
+                    choices= c("iris", "mtcars","diamond", "diamonds", "airquality"),
                     selected="iris"
                     )
         ),
@@ -35,6 +35,24 @@ shinyUI(navbarPage("Quick Data Explorer",
         )
       )
     ),
+    tabPanel ("Plot Exploration",
+            fluidRow(
+              column(4,
+                     wellPanel (
+                       uiOutput("plotXDropDown"),
+                       uiOutput("plotYDropDown"),
+                       uiOutput("plotColorDropDown"),
+                       uiOutput("plotFacetRowDropDown"),
+                       uiOutput("plotFacetColDropDown")
+                     )
+              ),
+              column(8,
+                     wellPanel (
+                       plotOutput("plotExplorer")
+                     )               
+              )
+            )
+    ),
     tabPanel ("Cluster Exploration",
       fluidRow(
         column(4,
@@ -43,12 +61,17 @@ shinyUI(navbarPage("Quick Data Explorer",
          ),
          wellPanel (
            uiOutput("colsYDropDown")
+         ),
+         wellPanel (
+            numericInput('clusters', 'Cluster count', 3,min = 1, max = 9)
          )
+        ),
+        column(8,
+               wellPanel (
+                 plotOutput("plotCluster") 
+               )               
         )
       )
-    ),
-    tabPanel ("Plot Exploration",
-        verbatimTextOutput("textTest2")
     )
   )
 )

@@ -7,6 +7,8 @@
 
 library(shiny)
 library(UsingR)
+library(datasets)
+library(ggplot2)
 
 shinyServer(function(input, output) {
   
@@ -17,7 +19,9 @@ shinyServer(function(input, output) {
     data <- switch (input$datasetSelect, 
                     iris = iris,
                     mtcars = mtcars,
-                    diamond = diamond)    
+                    diamond = diamond,
+                    diamonds = diamonds,
+                    airquality  = airquality )    
     data       
   })
   
@@ -94,6 +98,23 @@ shinyServer(function(input, output) {
     )
   })
   
+  
+  #Cluster Explorer
+  #===================================
+  getDatasetCluster <- reactive({
+    data<-getDatasetFiltered()
+    
+    data<-data[c(input$colsXDropDown,input$colsYDropDown)]
+    data<-data[complete.cases(data),]
+    data
+  })
+  
+  clusters <- reactive({
+    data <- getDatasetCluster()
+    kmeans(data, input$clusters)
+  })
+  
+  
   output$colsXDropDown <- renderUI ({
     data<-getDatasetFiltered()
     cols<-colnames(data)
@@ -104,14 +125,99 @@ shinyServer(function(input, output) {
   })
   
   output$colsYDropDown <- renderUI ({
-    data<-getDatasetFiltered()
+    data<-getDatasetFiltered()    
     cols<-colnames(data)
     selectInput("colsYDropDown", "Y Variable",
                        choices = cols,
                        selected = cols[1]
+      )
+    })
+ 
+    output$plotCluster <- renderPlot({
+      par(mar = c(5.1, 4.1, 0, 1))
+      plot(getDatasetCluster(),
+           col = clusters()$cluster,
+           pch = 20, cex = 3)
+      points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
+    })
+    
+#Plot Exploration
+
+  output$plotXDropDown <- renderUI ({
+    data<-getDatasetFiltered()
+    cols<-colnames(data)
+    selectInput("plotXDropDown", "X",
+                choices = cols,
+                selected = cols[1]
     )
   })
   
+  output$plotYDropDown <- renderUI ({
+    data<-getDatasetFiltered()
+    cols<-colnames(data)
+    selectInput("plotYDropDown", "Y",
+                choices = cols,
+                selected = cols[1]
+    )
+  })
+  
+  output$plotColorDropDown <- renderUI ({
+    data<-getDatasetFiltered()
+    cols<-c("None",colnames(data))
+    selectInput("plotColorDropDown", "Color",
+                choices = cols,
+                selected = cols[1]
+    )
+  })
+  
+  output$plotFacetRowDropDown <- renderUI ({
+    data<-getDatasetFiltered()
+    data<-data[!sapply(data,is.numeric)]
+    cols<-c(None='.',colnames(data))
+    selectInput("plotFacetRowDropDown", "Facet Row",
+                choices = cols,
+                selected = cols[1]
+    )
+  })
+  
+  output$plotFacetColDropDown <- renderUI ({
+    data<-getDatasetFiltered()
+    data<-data[!sapply(data,is.numeric)]
+    cols<-c(None='.',colnames(data))
+    selectInput("plotFacetColDropDown", "Facet Col",
+                choices = cols,
+                selected = cols[1]
+    )
+  })
+  
+  getDatasetPlot <- reactive({
+    data<-getDatasetFiltered()
+    
+    #data<-data[c(input$plotXDropDown,input$plotYDropDown,input$plotColorDropDown,input$plotFacetRowDropDown,input$plotFacetColDropDown)]
+    #data<-data[complete.cases(data),]
+    data
+  })
+  
+  output$plotExplorer <- renderPlot({
+    data<-getDatasetPlot()
+    p <- ggplot(data, aes_string(x=input$plotXDropDown, y=input$plotYDropDown)) + geom_point()
+    
+    if (input$plotColorDropDown != 'None')
+      p <- p + aes_string(color=input$plotColorDropDown)
+    
+    facets <- paste(input$plotFacetRowDropDown, '~', input$plotFacetColDropDown)
+    if (facets != '. ~ .')
+      p <- p + facet_grid(facets)
+    
+#     if (input$jitter)
+#       p <- p + geom_jitter()
+#     if (input$smooth)
+#       p <- p + geom_smooth()
+    
+    print(p)
+    
+  })
+
   output$textTest <- renderText ({
     "jc"
   })
