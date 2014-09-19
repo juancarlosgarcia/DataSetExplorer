@@ -31,13 +31,15 @@ shinyServer(function(input, output) {
     dfTypes$colTypes <- paste(dfTypes$cols,"-",dfTypes$types)
     dfTypes  
   })
-    
-  output$myTable <- renderDataTable({
+  
+  getDatasetFiltered <- reactive({
     data<-getDataset()
+    cols <- colnames(data)
     
-    if (length(input$colsDropDown)>0)
+    if (!is.null(input$colsDropDown))
     {
-      data <- data[input$colsDropDown]
+      if (length(intersect(cols,input$colsDropDown))>0)        
+        data <- data[input$colsDropDown]
     }
     
     if (length(input$typesDropDown)>0)
@@ -48,12 +50,19 @@ shinyServer(function(input, output) {
                       integer = data[sapply(data,is.integer)],
                       numeric = data[sapply(data,is.numeric)],
                       character = data[sapply(data,is.character)],
+                      logical = data[sapply(data,logical)],
                       data
-                      )
+      )
       
     }
     
-    data    
+    data     
+  })
+  
+  output$myTable <- renderDataTable({
+    data<-getDatasetFiltered()
+    data
+   
   }, options = list(bSortClasses = TRUE, iDisplayLength = 10)) 
   
   
@@ -64,13 +73,12 @@ shinyServer(function(input, output) {
   
   
   output$myDataset <- renderText({
-    
     input$datasetSelect    
   })
   
   output$colsDropDown <- renderUI ({
     dfTypes <- getDataTypes()
-    checkboxGroupInput("colsDropDown", "Names",
+    checkboxGroupInput("colsDropDown", "Filter by Names",
                        choices = dfTypes$cols,
                        selected = dfTypes$cols
                   )
@@ -80,15 +88,36 @@ shinyServer(function(input, output) {
     dfTypes <- getDataTypes()
     types <- c("All",unique(dfTypes$types))
     
-    selectInput("typesDropDown", "Types",
+    selectInput("typesDropDown", "Filter by Types",
                        choices = types,
                        selected = "All"
     )
   })
   
+  output$colsXDropDown <- renderUI ({
+    data<-getDatasetFiltered()
+    cols<-colnames(data)
+    selectInput("colsXDropDown", "X Variable",
+                       choices = cols,
+                       selected = cols[1]
+    )
+  })
+  
+  output$colsYDropDown <- renderUI ({
+    data<-getDatasetFiltered()
+    cols<-colnames(data)
+    selectInput("colsYDropDown", "Y Variable",
+                       choices = cols,
+                       selected = cols[1]
+    )
+  })
   
   output$textTest <- renderText ({
-    str(sapply(getDataset(),is.factor))
+    "jc"
+  })
+  
+  output$textTest2 <- renderText ({
+    "jc"
   })
   
 })

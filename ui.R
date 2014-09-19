@@ -7,37 +7,48 @@
 
 library(shiny)
 
-shinyUI(fluidPage(
-
-  # Application title
-  titlePanel("Data Set Explorer"),
-
-  fluidRow(
-    column(4,
-      wellPanel (
-      selectInput("datasetSelect", label = "Data Set:",
-                  choices= c("iris", "mtcars", "diamond"),
-                  selected="iris"
-                  )
+shinyUI(navbarPage("Quick Data Explorer",
+  tabPanel("Data Exploration",
+    fluidRow(
+      column(4,
+        wellPanel (
+        selectInput("datasetSelect", label = "Data Set:",
+                    choices= c("iris", "mtcars", "diamond"),
+                    selected="iris"
+                    )
+        ),
+  
+        wellPanel (
+          uiOutput("colsDropDown") 
+        ),
+        wellPanel (
+          uiOutput("typesDropDown") 
+        )
       ),
-
-      wellPanel (
-        uiOutput("colsDropDown") 
-      ),
-      wellPanel (
-        uiOutput("typesDropDown") 
-      )    
-    ),
-    
-    
-    column (8,      
-      tabsetPanel(
-        tabPanel(textOutput("myDataset"), dataTableOutput("myTable")),
-        tabPanel("Schema", dataTableOutput("myTableSchema"))
-                 ),
-      verbatimTextOutput("textTest")
       
+      
+      column (8,      
+        tabsetPanel(
+          tabPanel(textOutput("myDataset"), dataTableOutput("myTable")),
+          tabPanel("Schema", dataTableOutput("myTableSchema"))
+                   )
+        )
       )
+    ),
+    tabPanel ("Cluster Exploration",
+      fluidRow(
+        column(4,
+         wellPanel (
+           uiOutput("colsXDropDown")
+         ),
+         wellPanel (
+           uiOutput("colsYDropDown")
+         )
+        )
+      )
+    ),
+    tabPanel ("Plot Exploration",
+        verbatimTextOutput("textTest2")
     )
   )
 )
