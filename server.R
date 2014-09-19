@@ -37,21 +37,23 @@ shinyServer(function(input, output) {
     
     if (length(input$colsDropDown)>0)
     {
-      data <- data[,input$colsDropDown]
+      data <- data[input$colsDropDown]
     }
     
     if (length(input$typesDropDown)>0)
     {
       data <- switch (input$typesDropDown, 
-                      numeric = data[,sapply(data,is.numeric)],
-                      factor = data[,sapply(data,is.factor)],
-                      character = data[,sapply(data,is.character)]
+                      All = data,                      
+                      factor = as.data.frame(data[sapply(data,is.factor)]),                      
+                      integer = data[sapply(data,is.integer)],
+                      numeric = data[sapply(data,is.numeric)],
+                      character = data[sapply(data,is.character)],
+                      data
                       )
       
     }
     
-    data
-    
+    data    
   }, options = list(bSortClasses = TRUE, iDisplayLength = 10)) 
   
   
@@ -76,17 +78,17 @@ shinyServer(function(input, output) {
   
   output$typesDropDown <- renderUI ({
     dfTypes <- getDataTypes()
-    types <- unique(dfTypes$types)
+    types <- c("All",unique(dfTypes$types))
     
     selectInput("typesDropDown", "Types",
                        choices = types,
-                       selected = types
+                       selected = "All"
     )
   })
   
   
   output$textTest <- renderText ({
-    input$typesDropDown
+    str(sapply(getDataset(),is.factor))
   })
   
 })
